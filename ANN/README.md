@@ -10,3 +10,5 @@
 #### Gradient Descent Optimizations
 - https://arxiv.org/pdf/1804.07612.pdf
 - http://jmlr.org/papers/volume12/duchi11a/duchi11a.pdf
+- http://www.meyn.ece.ufl.edu/archive/spm_files/Courses/ECE555-2011/555media/poljud92.pdf
+
