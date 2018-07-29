@@ -330,8 +330,9 @@ class ANN:
 
     """
         Training function that prints out the prediction accuracy at each cycle
+        number of iterations to start printing the accuracy (print_count)
     """
-    def train(self, X,Y, cycles, learning_rate):
+    def train(self, X,Y, cycles, learning_rate, print_count = 10):
 
         X, self.Y = self.learning_optimization(X,Y)
         
@@ -340,8 +341,10 @@ class ANN:
           
             errorRate = self.compute_cost(ActivationLearn,self.Y)
             accu = 100 - (errorRate*100)
-            print("Accuracy: " + str(accu))
-            print("cycle "+ str(cyc))
+
+            if(cyc % print_count == 0):
+                print("Accuracy: " + str(accu))
+                print("cycle "+ str(cyc))
 
             self.accuracylist.append(accu)
            
@@ -414,7 +417,6 @@ class ANN:
         Y = Y[i]  #corrosponding label
         return X, Y
 
-        
     """
         Learning optimization function for gradient descent regarding observation sampling
             BGD  - Batch Gradient Descent
