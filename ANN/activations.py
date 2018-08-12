@@ -1,4 +1,5 @@
 import numpy as np 
+import math
 
 
 """________________________________________ A C T I V A T I O N   F U N C T I O N S ______________________________________________
@@ -24,5 +25,10 @@ def relu(Z):
 def softmax(Z):
     #axis=0 sum along rows
     exp = np.exp(Z - np.max(Z))
-    activation = exp/(np.sum(exp,axis=0))
+    activation = exp/(np.sum(exp, axis=0))
     return activation, Z
+
+def euler(Z):
+    activation = np.exp(Z)
+    return activation, Z
+

@@ -9,11 +9,13 @@ import random
 
 class ANN:
 
-    layer_dims = []
-    Y          = []
-    parameters = {}
-    num_layers = 0
-    batch_size = 0
+    layer_dims  = []
+    activations = []
+    Y           = []
+    parameters  = {}
+    num_layers  = 0
+    batch_size  = 0
+
     # Batch Gradient Descent as default
     optimization = "BGD" 
 
@@ -21,10 +23,13 @@ class ANN:
     accuracylist = []
 
     
-    def __init__(self, layer_dims, batch_size = 25, optimization ="BGD"):
+    def __init__(self, layer_dims, activations, batch_size = 25, optimization ="BGD"):
         self.optimization = optimization
         self.batch_size  = batch_size
+        self.activations = activations
         self.initialize_net(layer_dims)
+
+        assert(len(self.layer_dims) == len(self.activations))
 
         
     """______________________________________________I N I T I A L I Z A T I O N___________________________________________
@@ -113,6 +118,12 @@ class ANN:
             # Inputs: "A_prev, W, b". Outputs: "A, activation_cache".
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = activations.softmax(Z)
+
+        elif activation == "euler":
+            Z, linear_cache =  self.linear_forward(A_prev, W, b)
+            A, activation_cache = activations.euler(Z)
+        
+        
         
         assert (A.shape == (W.shape[0], A_prev.shape[1]))
         cache = (linear_cache, activation_cache)
@@ -142,11 +153,11 @@ class ANN:
         # Implement [LINEAR -> RELU]*(L-1). Add "cache" to the "caches" list.
         for l in range(1, L-1):
             A_prev = A 
-            A, cache = self.linear_activation_forward(A_prev,self.parameters["W" + str(l)], self.parameters["b" + str(l)], "relu")
+            A, cache = self.linear_activation_forward(A_prev,self.parameters["W" + str(l)], self.parameters["b" + str(l)], self.activations[l])
             caches.append(cache)
         
         # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
-        AL, cache =  self.linear_activation_forward(A,self.parameters["W" + str(L-1)], self.parameters["b" + str(L-1)], "softmax")
+        AL, cache =  self.linear_activation_forward(A,self.parameters["W" + str(L-1)], self.parameters["b" + str(L-1)], self.activations[L-1])
         caches.append(cache)
         assert(AL.shape == (10,X.shape[1]))        
         return AL, caches
@@ -207,7 +218,7 @@ class ANN:
 
     def sigmoid_backward(self,dA, activation_cache):
         Z = activation_cache
-        d = self.sigmoid_plain(Z)*(1 -self.sigmoid_plain(Z))
+        d = activations.sigmoid_plain(Z)*(1 - activations.sigmoid_plain(Z))
         dZ = np.multiply(dA,d) # Chain Rule
         return dZ
 
@@ -220,6 +231,11 @@ class ANN:
 
     def softmax_backward(self, dA, activation_cache):
         return dA - self.Y
+
+    def euler_backward(self, dA, activation_cache):
+        Z = activation_cache
+        dZ = np.multiply(dA, Z)
+        return dZ
 
     """
         Implement the backward propagation for the LINEAR->ACTIVATION layer.
@@ -237,7 +253,7 @@ class ANN:
     def linear_activation_backward(self, dA, cache, activation):
         
         linear_cache, activation_cache = cache
-        
+    
         if activation == "relu":
            
             dZ = self.relu_backward(dA, activation_cache)
@@ -248,6 +264,12 @@ class ANN:
             
             dZ = self.sigmoid_backward(dA, activation_cache)
             dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
+
+        elif activation == "euler":
+
+            dZ = self.euler_backward(dA, activation_cache)
+            dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
+
 
         elif activation == "softmax":
             dZ = self.softmax_backward(dA, activation_cache)
@@ -286,13 +308,13 @@ class ANN:
         
        
         current_cache = caches[L-1]
-        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = self.linear_activation_backward(AL, current_cache, "softmax")
+        grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = self.linear_activation_backward(AL, current_cache, self.activations[L])
     
         
         for l in reversed(range(L-1)):
             
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l+2)], current_cache, "relu")
+            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l+2)], current_cache, self.activations[l+1])
             grads["dA" + str(l + 1)] =  dA_prev_temp
             grads["dW" + str(l + 1)] =  dW_temp
             grads["db" + str(l + 1)] =  db_temp
