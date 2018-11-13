@@ -3,3 +3,7 @@ Discern is a repo dedicated to deep understanding of  the leading research &amp;
 
 ### Linear Algebra Online Book
 http://immersivemath.com/ila/tableofcontents.html?
+
+
+## Usefull for speech synthesis in noisy enviroments
+https://looking-to-listen.github.io/
